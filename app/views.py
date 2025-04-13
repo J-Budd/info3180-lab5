@@ -82,6 +82,26 @@ def movies():
         return jsonify({"errors": form_errors(form)}), 400
 
 
+@app.route('/api/v1/movies', methods=['GET'])
+def get_movies():
+    movies = Movie.query.all()
+    movie_list = []
+
+    for movie in movies:
+        movie_list.append({
+            "id": movie.id,
+            "title": movie.title,
+            "description": movie.description,
+            "poster": f"/api/v1/posters/{movie.poster}"
+        })
+
+    return jsonify({"movies": movie_list})
+
+
+@app.route('/api/v1/posters/<filename>')
+def get_poster(filename):
+    return send_from_directory(os.path.join(os.getcwd(), app.config['UPLOAD_FOLDER']), filename)
+
 
 
 @app.route('/api/v1/csrf-token', methods=['GET'])
@@ -104,4 +124,5 @@ def add_header(response):
 @app.errorhandler(404)
 def page_not_found(error):
     """Custom 404 page."""
+    # No template in fork, which is why I changed it to a simple print message
     return "404 Not Found", 404
